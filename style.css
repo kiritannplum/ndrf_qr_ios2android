@@ -1,0 +1,332 @@
+/* 基本スタイル */
+:root {
+    --header-height: 54px;
+}
+
+html {
+    height: 100%;
+    /* overflow: hidden; デフォルトではページスクロールを許可 */
+}
+
+body {
+    height: 100%;
+    /* overflow: hidden; デフォルトではページスクロールを許可 */
+    font-family: sans-serif;
+    line-height: 1.6;
+    margin: 0;
+    background-color: #f4f4f4;
+    display: flex;
+    flex-direction: column;
+}
+
+.page-header {
+    height: var(--header-height);
+    flex-shrink: 0;
+    background-color: #333;
+    color: white;
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.page-header h1 {
+    margin: 0;
+    font-size: 1.5rem;
+}
+
+.main-container {
+    flex-grow: 1;
+    /* ★ 狭い画面ではページスクロールに任せるので overflow: hidden は削除 */
+    /* overflow: hidden; */
+    display: grid;
+    grid-template-columns: 1fr; /* デフォルトは1カラム */
+    grid-template-rows: auto;
+    grid-template-areas: /* デフォルトは縦積み */
+        "input_edit"
+        "result_generate";
+    gap: 20px;
+    padding: 20px;
+    box-sizing: border-box;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* --- デフォルト (狭い画面 < 900px) のエリアスタイル --- */
+/* 狭い画面では各エリアは内容に応じた高さになり、ページ全体でスクロール */
+.input-edit-area {
+    grid-area: input_edit;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* overflow-y, height, min-height は削除 -> 内容に応じて高さが決まる */
+}
+.result-generate-area {
+    grid-area: result_generate;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    /* overflow-y, height, min-height は削除 -> 内容に応じて高さが決まる */
+}
+
+
+/* ★★★ メディアクエリで広い画面のレイアウトとスクロールを制御 ★★★ */
+@media (min-width: 900px) {
+    /* --- 広い画面 (>900px) --- */
+    html, body {
+        overflow: hidden; /* 広い画面ではページ全体のスクロールを禁止 */
+    }
+    .main-container {
+        grid-template-columns: minmax(350px, 1.2fr) minmax(300px, 1fr); /* 2カラム */
+        grid-template-rows: 1fr; /* 高さをコンテナに合わせる */
+        grid-template-areas: /* 横並び */
+            "input_edit result_generate";
+        overflow: hidden; /* main-container自体のスクロールも念のため禁止 */
+        height: calc(100% - var(--header-height)); /* ヘッダーを除いた高さ */
+    }
+
+    /* 広い画面では左右エリアに独立スクロールを設定 */
+    .input-edit-area,
+    .result-generate-area {
+        overflow-y: auto;  /* 縦スクロール */
+        overflow-x: hidden; /* 横スクロール禁止 */
+        height: 100%; /* 親(.main-container)の高さに合わせる */
+        min-height: 0; /* flexアイテムの縮小問題を回避 */
+        scrollbar-width: thin;
+        scrollbar-color: #aaa #f4f4f4;
+    }
+    .input-edit-area::-webkit-scrollbar,
+    .result-generate-area::-webkit-scrollbar {
+        width: 8px;
+    }
+    .input-edit-area::-webkit-scrollbar-track,
+    .result-generate-area::-webkit-scrollbar-track {
+        background: #f4f4f4;
+        border-radius: 4px;
+    }
+    .input-edit-area::-webkit-scrollbar-thumb,
+    .result-generate-area::-webkit-scrollbar-thumb {
+        background-color: #aaa;
+        border-radius: 4px;
+        border: 2px solid #f4f4f4;
+    }
+
+    /* 広い画面でのみQRコード生成エリアをstickyにする */
+    #stickyQrContainer {
+        position: sticky;
+        /* top は親スクロールコンテナ(.result-generate-area)のpaddingを考慮 */
+        top: 0; /* 親にpaddingがない場合は0、あれば合わせる */
+        z-index: 10;
+        background: #fff; /* 背景がないと下の要素が透ける */
+    }
+} /* End of @media (min-width: 900px) */
+
+
+/* 各セクション共通スタイル */
+.input-section,
+.edit-section,
+.decoded-section,
+.generate-section {
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    flex-shrink: 0; /* スクロールコンテナ内で縮まないように */
+}
+
+h2 {
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 5px;
+    margin-top: 0;
+    color: #555;
+    font-size: 1.2rem;
+}
+
+input[type="file"],
+button,
+textarea {
+    margin-top: 5px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    width: 100%;
+}
+/* チェックボックスのデフォルトマージンを調整 */
+input[type="checkbox"] {
+    margin-top: 0;
+    margin-right: 5px; /* ラベルとの間隔 */
+    width: auto;
+    vertical-align: middle;
+}
+
+button {
+    cursor: pointer;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    transition: background-color 0.2s ease;
+    width: auto;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+
+button:hover:not(:disabled) {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    cursor: not-allowed;
+    opacity: 0.6;
+    background-color: #aaa;
+}
+
+.copy-btn {
+    background-color: #6c757d;
+    width: auto;
+    padding: 5px 10px;
+    font-size: 0.9em;
+    margin-left: 5px;
+    flex-shrink: 0;
+    margin-bottom: 0; /* button-groupでgapを使うため */
+    margin-top: 0; /* 上のマージンもリセット */
+}
+
+.copy-btn:hover:not(:disabled) {
+    background-color: #5a6268;
+}
+
+.raw-copy-btn {
+   /* background-color: #17a2b8; */
+}
+
+.textarea-container {
+    display: flex;
+    align-items: flex-start; /* Textareaと右の要素の上端を揃える */
+    margin-bottom: 10px;
+    width: 100%;
+    gap: 8px; /* Textareaと右の要素の間隔 */
+}
+
+/* ▼▼▼ デコード結果エリアの右側コントロール ▼▼▼ */
+.decoded-section .controls-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* チェックボックスとボタンの間隔 */
+    flex-shrink: 0; /* コンテナ幅が狭くなっても縮まない */
+    margin-top: 5px; /* textareaとの若干の間隔 */
+}
+
+.checkbox-group {
+    display: flex;
+    flex-direction: column; /* チェックボックスを縦に並べる */
+    gap: 5px;
+    font-size: 0.9em;
+}
+.checkbox-group label {
+    cursor: pointer;
+    display: inline-flex; /* チェックボックスとテキストを揃える */
+    align-items: center;
+}
+.checkbox-group input[type="checkbox"]:disabled + span { /* 必要ならラベルのスタイル */
+    color: #999;
+}
+
+.button-group {
+    display: flex;
+    flex-direction: column; /* ボタンを縦に並べる */
+    gap: 5px;
+    /* margin-left: 8px; コメントアウト (親のgapで調整) */
+    flex-shrink: 0;
+}
+
+.button-group .copy-btn {
+    width: 100%;
+    margin-left: 0;
+    box-sizing: border-box; /* paddingを含めてwidth 100% */
+}
+/* ▲▲▲ デコード結果エリアの右側コントロール ▲▲▲ */
+
+/* ▼▼▼ 編集エリアのコピーボタン (textarea-container直下) ▼▼▼ */
+.edit-section .textarea-container .copy-btn {
+    margin-top: 5px; /* textareaとの位置合わせ */
+}
+/* ▲▲▲ 編集エリアのコピーボタン ▲▲▲ */
+
+
+textarea {
+    font-family: monospace;
+    resize: vertical;
+    line-height: 1.4;
+    flex-grow: 1;
+    margin-bottom: 0;
+    text-transform: uppercase;
+    /* margin-top: 5px; も削除 (親要素で調整) */
+}
+
+textarea#decodedHexData {
+    /* ★ 広い画面での高さを確保しつつ、狭い画面で伸びすぎないように */
+    min-height: 8em;   /* 編集エリアと最低高さを合わせる */
+    max-height: 250px; /* 広い画面での最大高さ制限 */
+    overflow-y: auto; /* 広い画面で max-height を超えたらスクロール */
+    background-color: #e9ecef;
+}
+
+textarea#editableHexData {
+    /* ★ JSで高さを調整する */
+    overflow-y: hidden; /* スクロールバーはJSで高さ調整するので不要 */
+    min-height: 8em;
+}
+
+
+#qrImagePreview {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    display: block;
+    max-width: 100%;
+    height: auto;
+    background-color: #eee;
+    min-height: 50px;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #444;
+}
+
+#decodeStatus,
+#editStatus,
+#generateStatus {
+    font-style: italic;
+    color: #555;
+    min-height: 1.2em;
+    margin-top: 5px;
+    font-size: 0.9em;
+}
+
+#stickyQrContainer {
+    /* background, paddingなどは維持 */
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 4px;
+    margin-top: 15px;
+    flex-shrink: 0;
+    /* ★ position: sticky は広い画面でのみ適用 (メディアクエリ内へ移動) */
+}
+
+
+.sticky-qr-label {
+    font-weight: bold;
+    margin-bottom: 8px;
+}
+
+#newQrCodeContainer canvas {
+    display: block;
+    max-width: 100%;
+    height: auto !important;
+    margin: 10px auto 0;
+    border: 1px solid #ddd;
+    background-color: #eee;
+}

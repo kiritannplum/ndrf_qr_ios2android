@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QRコード リーダー＆ジェネレーター (バイト編集)</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="page-header">
+        <h1>QRコード リーダー＆ジェネレーター (バイト編集)</h1>
+    </header>
+
+    <main class="main-container">
+        <!-- 左エリア: QR画像入力 と Hex編集・入力 -->
+        <section class="input-edit-area">
+            <!-- QR画像入力 -->
+            <div class="input-section">
+                <h2>1. QRコード画像を読み込む (任意)</h2>
+                <p>画像を読み込むと、右のエリアにデコード結果が表示され、下のエリアで編集可能になります。</p>
+                <input type="file" id="qrInput" accept="image/*">
+                <p>読み込んだ画像プレビュー:</p>
+                <img id="qrImagePreview" src="#" alt="QR Code Preview" style="display: none;">
+                <canvas id="qrCanvas" style="display: none;"></canvas> <!-- デコード処理用 -->
+                <p id="decodeStatus"></p>
+            </div>
+
+            <!-- Hexデータ編集・入力 -->
+            <div class="edit-section">
+                <h2>2. Hexデータを編集・入力</h2>
+                <p>QR読み込み時は16バイトごとに改行、8行(128バイト)ごとに空行が挿入されます (スペースなし、大文字)。手入力/編集時はスペース・改行は無視されます。</p>
+                <div class="textarea-container">
+                    <textarea id="editableHexData" rows="8" cols="50" placeholder="ここに生成したいデータのHexを入力 (例: 48656C6C6F...)"></textarea>
+                    <button id="copyEditableBtn" class="copy-btn" title="編集中の表示形式でコピー">編集コピー</button>
+                </div>
+                <p id="editStatus">(生成時、スペースや改行は無視されます)</p>
+            </div>
+        </section>
+
+        <!-- 右エリア: 結果表示 と 生成 -->
+        <section class="result-generate-area">
+            <!-- デコード結果表示 (読み取り専用) -->
+            <div class="decoded-section">
+                <h2>デコード結果 (Hex表示)</h2>
+                <p>1バイトごとにスペース、16バイトごとに改行、8行(128バイト)ごとに空行を追加して表示されます (大文字)。</p>
+                <div class="textarea-container">
+                    <textarea id="decodedHexData" rows="8" cols="50" readonly placeholder="QRコードを読み込むか、下でHexを編集するとここに表示されます"></textarea>
+                    <!-- ▼▼▼ チェックボックスとコピーボタン ▼▼▼ -->
+                    <div class="controls-group">
+                        <div class="checkbox-group">
+                            <label>
+                                <input type="checkbox" id="i2aCheckbox" checked> i2a処理
+                            </label>
+                            <label>
+                                <input type="checkbox" id="largeSizeCheckbox" disabled> 大サイズ (>256B)
+                            </label>
+                        </div>
+                        <div class="button-group">
+                            <button id="copyDecodedBtn" class="copy-btn" title="表示形式のままコピー">形式コピー</button>
+                            <button id="copyDecodedRawBtn" class="copy-btn raw-copy-btn" title="スペース・改行なしでコピー">Rawコピー</button>
+                        </div>
+                    </div>
+                    <!-- ▲▲▲ チェックボックスとコピーボタン ▲▲▲ -->
+                </div>
+            </div>
+
+            <!-- 新しいQRコード生成 -->
+            <div class="generate-section">
+                <h2>3. デコード結果でQRコードを生成</h2>
+                <button id="generateBtn">デコード結果でQRコード生成</button>
+                <p id="generateStatus"></p>
+                <div id="stickyQrContainer">
+                    <p class="sticky-qr-label">生成されたQRコード:</p>
+                    <div id="newQrCodeContainer">
+                        <canvas id="newQrCanvas"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ライブラリの読み込み -->
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    <!-- 自作スクリプト -->
+    <script src="script.js"></script>
+</body>
+</html>
