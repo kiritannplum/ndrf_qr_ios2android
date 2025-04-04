@@ -1,0 +1,1 @@
+# tndm_qr_ios2android
