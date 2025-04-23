@@ -90,7 +90,7 @@ function autoResizeTextarea(textarea) {
  * @param {Uint8Array} originalBytes - 元のバイト配列
  * @returns {Uint8Array|null} - 処理後のバイト配列、またはエラー/入力なしの場合はnull
  */
-function applyI2aProcessing(originalBytes) {
+function applyI2aProcessing(originalBytes, qrVersion = 0) {
     if (!originalBytes || originalBytes.length === 0) {
         return null;
     }
@@ -98,7 +98,7 @@ function applyI2aProcessing(originalBytes) {
     const byteLength = originalBytes.length;
 
     let isLarge;
-    if (byteLength >= 256) {
+    if (byteLength >= 256 || qrVersion >= 10) {
         isLarge = true;
     } else if (byteLength >= 128) {
         isLarge = largeSizeCheckbox.checked;
@@ -212,16 +212,16 @@ function decodeQrCode(imageDataUrl) {
             if (code) { // デコード成功
                 originalDecodedBytes = new Uint8Array(code.binaryData);
 
-                updateLargeSizeCheckboxState(originalDecodedBytes.length, true);
-                processedI2aBytes = applyI2aProcessing(originalDecodedBytes);
-
-                updateDecodedDisplay();
-                editableHexData.value = bytesToFormattedHexForEdit(originalDecodedBytes);
-
                 // ▼▼▼ バージョン情報を取得してステータスに追加 ▼▼▼
                 const qrVersion = code.version; // バージョン番号を取得
                 decodeStatus.textContent = `デコード成功！ (${originalDecodedBytes.length} バイト, Ver: ${qrVersion})`;
                 // ▲▲▲ バージョン情報を取得してステータスに追加 ▲▲▲
+
+                updateLargeSizeCheckboxState(originalDecodedBytes.length, true);
+                processedI2aBytes = applyI2aProcessing(originalDecodedBytes, qrVersion);
+
+                updateDecodedDisplay();
+                editableHexData.value = bytesToFormattedHexForEdit(originalDecodedBytes);
 
                 autoResizeTextarea(editableHexData);
                 // decodedHexData もリサイズ（初回表示時）
